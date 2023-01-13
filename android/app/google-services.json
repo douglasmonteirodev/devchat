@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "959095338594",
+    "project_id": "devchat-3bdd6",
+    "storage_bucket": "devchat-3bdd6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:959095338594:android:b04b68bb8ac070dc14c33b",
+        "android_client_info": {
+          "package_name": "com.devchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "959095338594-sn4kcub2j83ifhdpmuhjfvtl5g45necg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-4uGsU2lyGtZtOMIE8TTMYlDnTgj2Vzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "959095338594-sn4kcub2j83ifhdpmuhjfvtl5g45necg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
