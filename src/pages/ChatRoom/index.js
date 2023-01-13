@@ -1,25 +1,37 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
   View,
   SafeAreaView,
   TouchableOpacity,
+  Modal,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useIsFocused} from '@react-navigation/native';
 
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
 import FabButton from '../../components/FabButton';
+import ModalNewRoom from '../../components/Modal/Index';
 
 export default function ChatRoom() {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    const hasUser = auth().currentUser ? auth().currentUser.toJSON() : null;
+    console.log(hasUser);
+    setUser(hasUser);
+  }, [isFocused]);
 
   function handleLogout() {
     auth()
       .signOut()
       .then(() => {
+        setUser(null);
         navigation.navigate('SignIn');
       })
       .catch(() => {
@@ -31,12 +43,7 @@ export default function ChatRoom() {
       <View style={styles.headerRoom}>
         <View style={styles.headerRoomLeft}>
           <TouchableOpacity onPress={handleLogout}>
-            <MaterialIcon
-              name="logout"
-              size={28}
-              color="#fff"
-              style={{marginTop: 5}}
-            />
+            {user && <MaterialIcon name="logout" size={28} color="#fff" />}
           </TouchableOpacity>
 
           <Text style={styles.title}>Grupos</Text>
@@ -47,7 +54,11 @@ export default function ChatRoom() {
         </TouchableOpacity>
       </View>
 
-      <FabButton setVisible={() => setModalVisible(true)} />
+      <FabButton setVisible={() => setModalVisible(true)} userStatus={user} />
+
+      <Modal visible={modalVisible} animationType="fade" transparent={true}>
+        <ModalNewRoom setVisible={() => setModalVisible(false)} />
+      </Modal>
     </SafeAreaView>
   );
 }
