@@ -10,16 +10,35 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 
-export default function ModalNewRoom({setVisible}) {
+export default function ModalNewRoom({setVisible, updateScreen}) {
   const [roomName, setRoomName] = useState('');
 
   const user = auth().currentUser.toJSON();
+
   function handleButtonCreate() {
     if (roomName === '') {
       return;
     }
+    //Limitar qtd de salas criadas pelo usuario
 
-    createRoom();
+    firestore()
+      .collection('MESSAGE_THREADS')
+      .get()
+      .then(snapshot => {
+        let count = 0;
+
+        snapshot.docs.map(item => {
+          if (item.data().owner === user.uid) {
+            count += 1;
+          }
+        });
+
+        if (count >= 4) {
+          alert('Você já atingiu o limite de grupos por usuário!');
+        } else {
+          createRoom();
+        }
+      });
   }
 
   function createRoom() {
@@ -43,6 +62,7 @@ export default function ModalNewRoom({setVisible}) {
           })
           .then(() => {
             setVisible();
+            updateScreen();
           });
       })
       .catch(err => {

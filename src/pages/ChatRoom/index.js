@@ -6,6 +6,9 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Modal,
+  ActivityIndicator,
+  FlatList,
+  Alert,
 } from 'react-native';
 import {useNavigation, useIsFocused} from '@react-navigation/native';
 
@@ -13,19 +16,57 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import auth from '@react-native-firebase/auth';
 import FabButton from '../../components/FabButton';
 import ModalNewRoom from '../../components/Modal/Index';
+import firestore from '@react-native-firebase/firestore';
+import ChatList from './../../components/ChatList/index';
 
 export default function ChatRoom() {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [user, setUser] = useState(null);
 
+  const [threads, setThreads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [updateScreen, setUpdateScreen] = useState(false);
+
   const isFocused = useIsFocused();
 
   useEffect(() => {
     const hasUser = auth().currentUser ? auth().currentUser.toJSON() : null;
-    console.log(hasUser);
     setUser(hasUser);
   }, [isFocused]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    function getChats() {
+      firestore()
+        .collection('MESSAGE_THREADS')
+        .orderBy('lastMessage.createdAt', 'desc')
+        .limit(10)
+        .get()
+        .then(snapshot => {
+          const threads = snapshot.docs.map(doc => {
+            return {
+              _id: doc.id,
+              name: '',
+              lastMessage: {
+                text: '',
+              },
+              ...doc.data(),
+            };
+          });
+          if (isActive) {
+            setThreads(threads);
+            setLoading(false);
+          }
+        });
+    }
+
+    getChats();
+    return () => {
+      isActive = false;
+    };
+  }, [isFocused, updateScreen]);
 
   function handleLogout() {
     auth()
@@ -38,6 +79,36 @@ export default function ChatRoom() {
         console.log('Não possui nenhum usuario');
       });
   }
+
+  function deleteRoom(ownerId, idRoom) {
+    //checando se quem ta tentando deletar é dono da sala
+    if (ownerId !== user?.uid) {
+      return;
+    }
+
+    Alert.alert('Atenção!', 'Você tem certeza que deseja deletar essa sala?', [
+      {
+        text: 'Cancel',
+        onPress: () => {},
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: () => handleDeleteRoom(idRoom),
+      },
+    ]);
+  }
+
+  async function handleDeleteRoom(idRoom) {
+    await firestore().collection('MESSAGE_THREADS').doc(idRoom).delete();
+
+    setUpdateScreen(!updateScreen);
+  }
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#555" />;
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerRoom}>
@@ -54,10 +125,25 @@ export default function ChatRoom() {
         </TouchableOpacity>
       </View>
 
+      <FlatList
+        data={threads}
+        keyExtractor={item => item._id}
+        showsVerticalScrollIndicator={false}
+        renderItem={({item}) => (
+          <ChatList
+            data={item}
+            deleteRoom={() => deleteRoom(item.owner, item._id)}
+          />
+        )}
+      />
+
       <FabButton setVisible={() => setModalVisible(true)} userStatus={user} />
 
       <Modal visible={modalVisible} animationType="fade" transparent={true}>
-        <ModalNewRoom setVisible={() => setModalVisible(false)} />
+        <ModalNewRoom
+          setVisible={() => setModalVisible(false)}
+          updateScreen={() => setUpdateScreen(!updateScreen)}
+        />
       </Modal>
     </SafeAreaView>
   );
