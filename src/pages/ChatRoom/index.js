@@ -101,7 +101,6 @@ export default function ChatRoom() {
 
   async function handleDeleteRoom(idRoom) {
     await firestore().collection('MESSAGE_THREADS').doc(idRoom).delete();
-
     setUpdateScreen(!updateScreen);
   }
 
@@ -133,6 +132,7 @@ export default function ChatRoom() {
           <ChatList
             data={item}
             deleteRoom={() => deleteRoom(item.owner, item._id)}
+            userStatus={user}
           />
         )}
       />
