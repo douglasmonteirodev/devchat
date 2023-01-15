@@ -1,16 +1,53 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
   TextInput,
+  Keyboard,
+  FlatList,
 } from 'react-native';
-
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+import {useIsFocused} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import ChatList from './../../components/ChatList';
 
 export default function Search() {
   const [input, setInput] = useState('');
+  const [user, setUser] = useState(null);
+  const [chats, setChats] = useState([]);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    const hasUser = auth().currentUser && auth().currentUser.toJSON();
+    setUser(hasUser);
+  }, [isFocused]);
+
+  async function handleSearch() {
+    if (input === '') return;
+
+    const responseSearch = await firestore()
+      .collection('MESSAGE_THREADS')
+      .where('name', '>=', input)
+      .where('name', '<=', input + '\uf8ff')
+      .get()
+      .then(querySnapshot => {
+        const threads = querySnapshot.docs.map(documentSnapshot => {
+          return {
+            _id: documentSnapshot.id,
+            name: '',
+            lastMessage: {text: ''},
+            ...documentSnapshot.data(),
+          };
+        });
+
+        setChats(threads);
+        setInput('');
+        Keyboard.dismiss();
+      });
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -22,10 +59,17 @@ export default function Search() {
           style={styles.input}
           autoCapitalize={'none'}
         />
-        <TouchableOpacity style={styles.buttonSearch}>
+        <TouchableOpacity style={styles.buttonSearch} onPress={handleSearch}>
           <MaterialIcons name="search" size={30} color="#FFF" />
         </TouchableOpacity>
       </View>
+
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={chats}
+        keyExtractor={item => item._id}
+        renderItem={({item}) => <ChatList data={item} userStatus={user} />}
+      />
     </SafeAreaView>
   );
 }
