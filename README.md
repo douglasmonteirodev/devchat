@@ -1,6 +1,6 @@
 # Dev chat
 
-[![Figma](https://img.shields.io/badge/figma-link-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/file/KhnB1B9viEHdMmt2R6PNpY/DevChat?node-id=0%3A1&t=DgpphQO1KkgQGJ9z-0)
+[![Figma](https://img.shields.io/badge/figma-link-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/file/KhnB1B9viEHdMmt2R6PNpY/DevChat?node-id=0%3A1&t=DgpphQO1KkgQGJ9z-0) [![Blog](https://img.shields.io/website?label=download-apk&style=for-the-badge&url=https://drive.google.com/file/d/1qG-taKfKyNxVzQm0KOxSgOYMTll6owXR/view?usp=share_link)](https://drive.google.com/file/d/1qG-taKfKyNxVzQm0KOxSgOYMTll6owXR/view?usp=share_link)
 
 <p align="center">
   <img src="src/assets/preview/home.png">
